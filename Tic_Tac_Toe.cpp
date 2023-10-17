@@ -52,6 +52,69 @@ bool line_check (std::vector<state>& grid, int cell_number, int dimension, int l
     if (flag==cell_number) {return true;}
     else {return false;}
 }
+// si verifica se il secondo è evoluzione del primo (generico temporale)
+bool areVectorsEquivalent(const std::vector<state>& vec1, const std::vector<state>& vec2) {
+    if (vec1.size() != vec2.size()) {
+        return false;
+    }
+    for (size_t i = 0; i < vec1.size(); i++) {
+        if (vec2[i] != state::N) {
+            if (vec1[i] != vec2[i]) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+// Funzione per confrontare l'uguaglianza di due vettori state
+bool areVectorsEqual(const std::vector<state>& vec1, const std::vector<state>& vec2) {
+    if (vec1.size() != vec2.size()) {
+        return false;
+    }
+
+    for (size_t i = 0; i < vec1.size(); i++) {
+        if (vec1[i] != vec2[i]) {
+            return false;
+        }
+    }
+
+    return true;
+}
+// Funzione per rimuovere i vettori duplicati in un vector<vector<state>>
+void removeDuplicateVectors(std::vector<std::vector<state>>& history) {
+    std::vector<std::vector<state>> uniqueVectors;
+
+    for (const auto& vector : history) {
+        bool isDuplicate = false;
+
+        for (const auto& uniqueVector : uniqueVectors) {
+            if (vector.size() != uniqueVector.size()) {
+                continue; // Dimensioni diverse, non possono essere uguali
+            }
+
+            if (areVectorsEqual(vector, uniqueVector)) {
+                isDuplicate = true;
+                break;
+            }
+        }
+
+        if (!isDuplicate) {
+            uniqueVectors.push_back(vector);
+        }
+    }
+
+    // Sovrascrivi history con i vettori univoci
+    history = uniqueVectors;
+}
+
+// Funzione per eliminare i vettori duplicati
+void removeDuplicateVectors(std::vector<std::vector<std::vector<state>>>& history) {
+    for (size_t i=0; i<history.size(); i++) {
+        removeDuplicateVectors(history[i]);
+    }
+}
+
 
 // Funzione di supporto che fa il check della vincita
 bool check_win(std::vector<state> grid, int cell_number, int dimension) {
@@ -153,7 +216,7 @@ void Board::print2D() {
 }
 // Funzione ricorsiva per generare le mosse
 void generate_moves(std::vector<state> grid, int cell_number, int dimension, std::vector<std::vector<std::vector<state>>>& result, int move) {
-    if (move >= int_pow(cell_number, dimension)) {
+    if (move > int_pow(cell_number, dimension)) {
         return; // Se tutte le mosse sono state fatte, esci dalla ricorsione
     }
         
@@ -184,7 +247,8 @@ void generate_moves(std::vector<state> grid, int cell_number, int dimension, std
        std::vector<std::vector<std::vector<state>>> result; 
         // Richiama la funzione ricorsiva per generare le mosse
         generate_moves(grid, cell_number, dimension, result, 0);
-
+        cout<<"ora seleziono"<<endl;
+        removeDuplicateVectors(result); //AL MOMENTO PARE INCALCOLABILE...
         return result;
     }
 //---------------------------------NOTES---------------------------
