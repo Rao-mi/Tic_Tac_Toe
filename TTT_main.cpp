@@ -31,18 +31,42 @@ int main() {
         }
         std::cout<<"--------------------------------------------------------------------"<<std::endl;
         }
-   /* std::ofstream file("TTT_3^2.csv");
+    std::ofstream file("TTT_3^2.csv");
         if (file.is_open()) {
-        file << "Nome,Età,Città\n";
-        file << "Alice,25,New York\n";
-        file << "Bob,30,San Francisco\n";
-        file << "Charlie,22,Los Angeles\n";
+    for (size_t j=0; j<history.size(); j++) {
+        for (size_t k=0; k<history[j].size(); k++) {
+        for (size_t i=0; i<history[j][k].size(); i++) {
+            int link=0;
+                if (j!=0 && j!=1) {
+                for (size_t l=0; l<history[j-1].size(); l++) {
+                    if (areVectorsEquivalent(history[j][k],history[j-1][l])){
+                        link=l;
+                    }
+                }
+
+                }
+
+        if (i==8) {
+            if (history[j][k][i]==state::X) {file<<"X;"<<link<<endl;}
+            else if (history[j][k][i]==state::O) {file<<"O;"<<link<<endl;}
+            else if (history[j][k][i]==state::N) {file<<"[ ];"<<link<<endl;}
+        }
+        else {
+            if (history[j][k][i]==state::X) {file<<"X, ";}
+            else if (history[j][k][i]==state::O) {file<<"O, ";}
+            else if (history[j][k][i]==state::N) {file<<"[ ], ";}
+        }
+
+    }
+    }   
+    file<<"----------------------------- mossa n "<<j<<" ----------------------------"<<endl;
+        }
 
         file.close();
         std::cout << "Dati scritti con successo nel file CSV." << std::endl;
     } else {
         std::cerr << "Impossibile aprire il file." << std::endl;
-    }*/
+    }
 
     return 0;
     
