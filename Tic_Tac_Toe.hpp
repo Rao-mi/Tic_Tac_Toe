@@ -15,10 +15,10 @@ class Board {
     Board(int set_cell_n, int set_dim);
     void setgrid(std::vector<state> source);
     bool Move(state player);
+    bool AI_Move();
     std::vector<std::vector<std::vector<state>>> all_plays();
-    bool Draw();
     std::vector<double> Entropy ();
     void print2D();
 };
-
+bool areVectorsEquivalent(const std::vector<state>& vec1, const std::vector<state>& vec2);
 #endif
