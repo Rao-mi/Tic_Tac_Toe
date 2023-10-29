@@ -56,6 +56,26 @@ int k_module(int k, int evaluate) {
         }
        
    }
+// Booleano che verifica se un dato int appartiene a un dato vector<int> o vector<vector<int>>
+bool element_verify(int element, const std::vector<int>& row) {
+        for (int value : row) {
+            if (value == element) {
+                return true;
+            }
+        }
+    return false;
+}
+//generalizzazione per vector<vector<int>>
+bool element_verify(int i, const std::vector<std::vector<int>>& limit,int cell_number, int dimension) {
+
+for (int k=0; k<static_cast<int>(limit.size()); k++) {
+                        for (size_t f=0; f<limit[k].size(); f++) {
+                    if (k_module(int_pow(cell_number,k+1-dimension),i)==limit[k][f] && k>=dimension) {return true;}
+                    else if (k_module(int_pow(cell_number,k+1),i)==limit[k][f] && k<dimension){return true;}
+
+}}
+return false;
+}
 //--------------------------------------------Parte di selezione------------------------------------
 // Funzione per verificare se due vettori rappresentano la stessa direzione
 bool same_directions(const std::vector<int>& first, const std::vector<int>& second) {
@@ -145,7 +165,6 @@ std::vector<std::vector<int>> j_a_remover(std::vector<std::vector<int>>& source,
 
     return result;
 }
-
 //--------------------------------------------Parte di generazione----------------------------------
 // Funzione ricorsiva per generare tutte le combinazioni di +1, -1 e 0 in k scatole
 void comb_gen(std::vector<int>& combination, int k, std::vector<std::vector<int>>& result, int posizione) {
@@ -170,28 +189,26 @@ std::vector<std::vector<int>> k_comb_gen(int k) {
     return result;
 }
 
-// Funzione che genera un vector di int di dimensione cell_number di soli 0 tranne in i, ove è 1
+// Funzione che genera un vector di int di dimensione dimension di soli 0 tranne in i, ove è 1
+std::vector<int> canonic(int dimension, int i) {
 
-std::vector<int> canonic(int cell_number, int i) {
-    // Crea un vettore di dimensione cell_number e inizializza tutti gli elementi a 0
-    std::vector<int> vettore(cell_number, 0);
+    std::vector<int> vettore(dimension, 0);
 
     // Imposta l'elemento in posizione i a 1 (assicurati che i sia valido)
-    if (i >= 0 && i < cell_number) {
+    if (i >= 0 && i < dimension) {
         vettore[i] = 1;}
 
     // Restituisci il vettore risultante
     return vettore;
 }
 
-// Funzione che genera un vector di int di dimensione cell_number di soli 0 tranne in i, ove è -1
+// Funzione che genera un vector di int di dimensione dimension di soli 0 tranne in i, ove è -1
+std::vector<int> inv_canonic(int dimension, int i) {
 
-std::vector<int> inv_canonic(int cell_number, int i) {
-    // Crea un vettore di dimensione cell_number e inizializza tutti gli elementi a 0
-    std::vector<int> vettore(cell_number, 0);
+    std::vector<int> vettore(dimension, 0);
 
     // Imposta l'elemento in posizione i a 1 (assicurati che i sia valido)
-    if (i >= 0 && i < cell_number) {
+    if (i >= 0 && i < dimension) {
         vettore[i] = -1;
     }
 
@@ -240,5 +257,73 @@ std::vector<std::vector<int>> constrains (int cell_number, int dimension) {
         }
         result.push_back(surname);
     }      
+    return result;
+}
+//Funzione per generare gli angoli
+std::vector<int> corner_generator (int cell_number, int dimension, int first_corner,std::vector<int>& collector){
+    //step 0
+    if (first_corner==0) {
+        collector.clear();
+        collector.push_back(0);
+    }
+    
+    if (!element_verify(int_pow(cell_number,dimension)-1,collector)) {
+
+    for (const int& corner : collector) {
+            int sum = corner+int_pow(cell_number,first_corner)*(cell_number-1);
+            if (!element_verify(sum,collector)){
+            collector.push_back(sum);}
+        }
+    collector=corner_generator (cell_number,dimension,first_corner+1,collector);
+    }
+    return collector;
+}
+// Funzione di verifica angoli
+bool is_corner(int cell_number, int dimension, int i) {
+  std::vector<int> corners;
+  corners = corner_generator(cell_number,dimension,0,corners);
+    if (element_verify(i,corners)) {return true;}
+    else return false;
+}
+// Funzione che fa si che ogni blocco segua SOLO le direzioni di cui è terminale
+std::vector<std::vector<std::vector<int>>> hyper_constrains (std::vector<std::vector<int>> constrains,int cell_number, int dimension){
+    int tot_dim=int_pow(cell_number,dimension);
+    std::vector<std::vector<std::vector<int>>> result;
+    std::vector<std::vector<int>> directions;
+    for (int i=0; i<tot_dim; i++) {
+        directions.clear();
+        // escludo le celle interne
+        if(!element_verify(i,constrains,cell_number,dimension)) {
+            std::cout<<i<<" è cella interna"<<std::endl;
+             std::vector<int> empty;
+            directions.push_back(empty);
+        }
+        //escludendo gli angoli
+        else if(is_corner(cell_number,dimension,i)){
+            std::cout<<i<<" è angolo"<<std::endl;
+            directions = k_comb_gen(dimension); // Genero le direzioni
+            directions= zero_cut(directions); // Tolgo lo zero
+            for (int k=0; k<static_cast<int>(constrains.size()); k++) {
+                for (size_t f=0; f<constrains[k].size(); f++) {
+                    if (k_module(int_pow(cell_number,k+1-dimension),i)==constrains[k][f] && k>=dimension) {directions = j_a_remover(directions,k-dimension,1);}
+                    else if (k_module(int_pow(cell_number,k+1),i)==constrains[k][f] && k<dimension){directions = j_a_remover(directions,k,-1);}
+                }}
+        
+        }
+
+        else {
+            std::cout<<i<<" è terminale non angolo"<<std::endl;
+        for (int k=0; k<static_cast<int>(constrains.size()); k++) {
+                for (size_t f=0; f<constrains[k].size(); f++) {
+            if (k_module(int_pow(cell_number,k+1-dimension),i)==constrains[k][f] && k>=dimension) {
+            std::vector<int> direction=inv_canonic(dimension,k-dimension);
+            directions.push_back(direction);}
+            else if (k_module(int_pow(cell_number,k+1),i)==constrains[k][f] && k<dimension){
+            std::vector<int> direction=canonic(dimension,k);
+            directions.push_back(direction);} 
+        }
+        }}
+        result.push_back(directions);
+    }
     return result;
 }
