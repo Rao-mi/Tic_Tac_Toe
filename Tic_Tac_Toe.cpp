@@ -1,6 +1,7 @@
 #include "Tic_Tac_Toe.hpp"
 #include <cmath>
 #include <iostream>
+#include <fstream>
 #include "directions.hpp"
 
 using std::cout;
@@ -16,9 +17,11 @@ using std::endl;
 #define PLAYER_MARKER state::X   //
 //-------------------------------//
 
-//--------------------------------------FUNZIONI NON PUBBLICHE------------------------------------------
+/////////////////////////////////////// FUNZIONI NON PUBBLICHE ///////////////////////////////////////
 
-// Funzione che mi conta i tipi
+//[0]------------------------------- FUNZIONI NECESSARIE A BOARD ------------------------------------
+
+//[0][0] Funzione che mi conta i tipi
 int type_count (state type, std::vector<state> grid) {
     int flag=0;
     for (size_t i=0; i<grid.size(); i++) {
@@ -27,7 +30,60 @@ int type_count (state type, std::vector<state> grid) {
     return flag;
 }
 
-// Funzione che verifica sulla direzione data tutte le celle per vedere se c'è una vincita
+//[0][1] Funzione per rimuovere uno stato nel vettore degli stati
+void removeVectors(std::vector<std::vector<state>>& v1,std::vector<state> v2) {
+    std::vector<std::vector<state>> result;
+    for (size_t i=0; i<v1.size(); i++) {
+        if (v1[i]!=v2) {
+            result.push_back(v2);
+        }
+    }
+    v1=result;
+}
+
+//[0][2] Funzione che gestisce l'fstream del file di stati
+std::vector<std::vector<state>> state_finder(size_t from_move) {
+    std::vector<std::vector<state>> TicTacToeStates;
+    std::ifstream inputFile("TTT_3^2.csv");
+    if (!inputFile.is_open()) {
+        std::cerr << "Errore nell'apertura del file CSV." << std::endl;
+        TicTacToeStates.clear();
+        return TicTacToeStates;
+    }
+
+    std::vector<state> currentMove;
+    std::string line;
+
+    while (std::getline(inputFile, line)) {
+        if (line.find("-------------") != std::string::npos) {
+            // Fine della mossa, aggiungi il vettore di stato corrente a ticTacToeStates
+            TicTacToeStates.push_back(currentMove);
+            currentMove.clear();
+        } else {
+            // Assicurati che la riga non sia vuota prima di leggere i caratteri
+            if (!line.empty()) {
+                // Leggi la riga e aggiungi gli stati a currentMove
+                for (char c : line) {
+                    if (c == 'X') {
+                        currentMove.push_back(state::X);
+                    } else if (c == 'O') {
+                        currentMove.push_back(state::O);
+                    } else if (c == 'N') {
+                        currentMove.push_back(state::N);
+                    }
+                }
+            }
+        }
+    }
+    if (from_move==0) {return TicTacToeStates;}
+    else {
+        for (size_t i=0; i<from_move; i++) {
+            removeVectors(TicTacToeStates,TicTacToeStates[i]);
+        }
+        return TicTacToeStates;
+    }
+}
+//[0][3] Funzione che verifica sulla direzione data tutte le celle per vedere se c'è una vincita
 bool line_check (std::vector<state>& grid, int cell_number, int dimension, int line, int start,std::vector<int> v_dir, std::vector<std::vector<int>> constrain) {
     int u = line;
     int flag=1;
@@ -48,7 +104,7 @@ bool line_check (std::vector<state>& grid, int cell_number, int dimension, int l
                     // cout<<"check è: "<<endl;
                    // print(check);
                     //cout<<"v_dir è: "<<endl;
-                    //print(v_dir);
+                    //print(v_dir); 
                     if (scalar_p(check,v_dir)>0) {
                     player=state::N;
                     j=constrain[i].size()-1;
@@ -64,7 +120,7 @@ bool line_check (std::vector<state>& grid, int cell_number, int dimension, int l
     if (flag==cell_number) {return true;}
     else {return false;}
 }
-// si verifica se il secondo è evoluzione del primo (generico temporale)
+//[0][4] Funzione che verifica se la seconda griglia è evoluzione della prima (generico temporale)
 bool areVectorsEquivalent(const std::vector<state>& vec1, const std::vector<state>& vec2) {
     if (vec1.size() != vec2.size()) {
         return false;
@@ -79,7 +135,7 @@ bool areVectorsEquivalent(const std::vector<state>& vec1, const std::vector<stat
     return true;
 }
 
-// Funzione per confrontare l'uguaglianza di due vettori state
+//[0][5] Funzione per confrontare l'uguaglianza di due vettori state
 bool areVectorsEqual(const std::vector<state>& vec1, const std::vector<state>& vec2) {
     if (vec1.size() != vec2.size()) {
         return false;
@@ -93,7 +149,8 @@ bool areVectorsEqual(const std::vector<state>& vec1, const std::vector<state>& v
 
     return true;
 }
-// Funzione per rimuovere i vettori duplicati in un vector<vector<state>>
+
+//[0][6] Funzione per rimuovere i vettori duplicati in un vector<vector<state>>
 void removeDuplicateVectors(std::vector<std::vector<state>>& history) {
     std::vector<std::vector<state>> uniqueVectors;
 
@@ -120,7 +177,7 @@ void removeDuplicateVectors(std::vector<std::vector<state>>& history) {
     history = uniqueVectors;
 }
 
-// Funzione per eliminare i vettori duplicati
+//[0][7] Funzione per eliminare i vettori duplicati nei vettori di vettori di state
 void removeDuplicateVectors(std::vector<std::vector<std::vector<state>>>& history) {
     for (size_t i=0; i<history.size(); i++) {
         removeDuplicateVectors(history[i]);
@@ -128,7 +185,7 @@ void removeDuplicateVectors(std::vector<std::vector<std::vector<state>>>& histor
 }
 
 
-// Funzione di supporto che fa il check della vincita
+//[0][8] Funzione di supporto che fa il check della vincita
 bool check_win(std::vector<state> grid, int cell_number, int dimension) {
     int tot_dim = int_pow(cell_number,dimension);
     std::vector<std::vector<int>> limit = constrains(cell_number,dimension); // Grazie a questo vettore posso definire i constrains, mediante aritmetica modulare
@@ -158,7 +215,7 @@ bool check_win(std::vector<state> grid, int cell_number, int dimension) {
     }
      return false;
 }
-// Funzione ricorsiva per generare le mosse
+//[0][9] Funzione ricorsiva per generare le mosse possibili
 void generate_moves(std::vector<state> grid, int cell_number, int dimension, std::vector<std::vector<std::vector<state>>>& result, int move) {
     if (move > int_pow(cell_number, dimension)) {
         return; // Se tutte le mosse sono state fatte, esci dalla ricorsione
@@ -187,7 +244,10 @@ void generate_moves(std::vector<state> grid, int cell_number, int dimension, std
     }
     generate_moves(grid, cell_number, dimension, result, move + 1);
 }
-//-------------------------------FUNZIONI NECESSARIE A MINMAX---------------------------------
+
+//[1]--------------------------------FUNZIONI NECESSARIE A MINMAX------------------------------------
+
+//[1][0] Funzione che verifica la vincita per un tipo state
 bool reduced_check_win(std::vector<state> grid, int cell_number, int dimension, state player) {
     int tot_dim = int_pow(cell_number,dimension);
     std::vector<std::vector<int>> limit = constrains(cell_number,dimension); // Grazie a questo vettore posso definire i constrains, mediante aritmetica modulare
@@ -213,6 +273,7 @@ bool reduced_check_win(std::vector<state> grid, int cell_number, int dimension, 
     }
     return false;
 }
+//[1][1] Funzione che verifica se non ci sono più mosse legali
 bool board_is_full(std::vector<state> grid) {
     int flag=0;
     for (size_t i=0; i<grid.size(); i++) {
@@ -221,7 +282,7 @@ bool board_is_full(std::vector<state> grid) {
     if (flag==0) return true;
     else return false;
 }
-
+//[1][2] Funzione che restituisce lo stato opposto
 state get_opponent(state player) {
     state opponent;
     if (player==state::X) {opponent=state::O;}
@@ -230,7 +291,7 @@ state get_opponent(state player) {
     opponent=player;}
     return opponent;
 }
-
+//[1][3] Funzione che restituisce lo stato intero della griglia
 int get_board_state (std::vector<state> grid, int cell_number, int dimension, state player) {
 state opponent=get_opponent(player);
 
@@ -250,7 +311,7 @@ for (size_t i=0; i<grid.size(); i++) {
 }
 return result;
 }
-//
+//[1][4] Funzione minimax
 std::pair<int, int> minimax_optimization( std::vector<state>& grid, int cell_number, int dimension,state marker, int depth, int alpha, int beta)
 {
     // Initialize best move
@@ -316,8 +377,110 @@ std::pair<int, int> minimax_optimization( std::vector<state>& grid, int cell_num
     }
     return std::make_pair(best_score, best_move);
 }
+//[2]------------------------- FUNZIONI NECESSARIE A ISING-LIKE-MODEL -------------------------------
 
-//--------------------------------------CLASSE BOARD------------------------------------------
+//[2][0] Funzione per inveertire lo stato
+state state_inverter (state player) {
+    if (player==state::X) {
+        return state::O;
+    }
+    else if (player==state::O){
+        return state::X;
+    }
+    else {
+        return state::N;
+    }
+}
+
+//[2][1] Funzione per calcolare lungo la direzione l'energia
+double line_energy (std::vector<state> grid, int start,int cell_number, int dimension, int n_direction_k, std::vector<int> v_dir,state player, std::vector<std::vector<int>> constrain) {
+    double unit=pow(pow(cell_number,dimension),-(1/cell_number));
+    int u = n_direction_k;
+    state flag_state = state::X;
+    int flag=1;
+    int anti_flag=0;
+    //cout<<"cell_number è: "<<cell_number<<endl;
+    //cout<<"dimension è: "<<dimension<<endl;
+    while (flag_state!=state::N){
+         if (start+u>=static_cast<int>(grid.size()) || start+u<0){
+            flag_state=state::N;
+         }
+        else if (grid[start+u]==player) { 
+            for (int i=0; i<static_cast<int>(constrain.size()); i++) {
+            for (int j=0; j<static_cast<int>(constrain[i].size()); j++) {      
+            if ((k_module(int_pow(cell_number,i+1-dimension),start+u)==constrain[i][j] && i>=dimension)||(k_module(int_pow(cell_number,i+1),start+u)==constrain[i][j] && i<dimension)) {
+                    std::vector<int> check;
+                    if (i>=dimension){check = canonic(dimension,i-dimension);}
+                    else {check = inv_canonic(dimension,i);}
+                     cout<<"check è: "<<endl;
+                    print(check);
+                    cout<<"v_dir è: "<<endl;
+                    print(v_dir); 
+                    if (scalar_p(check,v_dir)>0) {
+                    flag_state=state::N;
+                    j=constrain[i].size()-1;
+                    i=constrain.size()-1;
+                    }                
+                }   
+            }}        
+            u+=u;
+            flag +=1;
+        }
+        else if (grid[start+u]==state_inverter(player) && player!=state::N){
+            for (int i=0; i<static_cast<int>(constrain.size()); i++) {
+            for (int j=0; j<static_cast<int>(constrain[i].size()); j++) {      
+            if ((k_module(int_pow(cell_number,i+1-dimension),start+u)==constrain[i][j] && i>=dimension)||(k_module(int_pow(cell_number,i+1),start+u)==constrain[i][j] && i<dimension)) {
+                    std::vector<int> check;
+                    if (i>=dimension){check = canonic(dimension,i-dimension);}
+                    else {check = inv_canonic(dimension,i);}
+                     cout<<"check è: "<<endl;
+                    print(check);
+                    cout<<"v_dir è: "<<endl;
+                    print(v_dir); 
+                    if (scalar_p(check,v_dir)>0) {
+                    flag_state=state::N;
+                    j=constrain[i].size()-1;
+                    i=constrain.size()-1;
+                    } 
+
+                }   
+            }}        
+            u+=u;
+            anti_flag +=1;
+        } 
+        else {flag_state=state::N;}          
+    }
+    cout<<"flag è:"<<flag<<" mentr anti-flag è:"<<anti_flag<<endl;
+    double line_energy = 1;
+    for (int i=1; i<flag+1; i++) {
+        line_energy = line_energy*unit*i;
+    }
+    if (anti_flag!=0) {line_energy=0;}
+    return line_energy;
+}
+
+//[2][2] Funzione per calcolare l'energia secondo Ising-like
+double Energy(std::vector<state> grid,int cell_number, int dimension, state player, int k) {
+    double tot_energy=0;
+    int tot_dim = int_pow(cell_number,dimension);
+    std::vector<std::vector<int>> limit = constrains(cell_number,dimension); // Grazie a questo vettore posso definire i constrains, mediante aritmetica modulare
+    std::vector<int> n_directions;
+    std::vector<std::vector<std::vector<int>>> terminal_directions = hyper_constrains(limit,cell_number,dimension);
+    for (int i=0; i<tot_dim; i++) {
+                if (grid[i]==player) { 
+            n_directions = numeric_directions(cell_number,terminal_directions[i]); // Trasformo i vettori in numeri  
+                       for (size_t k=0; k<n_directions.size(); k++){
+                        if (terminal_directions[i][k].size()!=0){
+                            cout<<"L'energia parziale è"<<tot_energy;
+                            tot_energy=tot_energy+line_energy(grid,i,cell_number,dimension,n_directions[k],terminal_directions[i][k],player,limit);}
+        }
+    }
+}
+tot_energy=k*tot_energy;
+//tot_energy = pow(tot_energy,0.333333333333333333333333333);
+return tot_energy;
+}
+//////////////////////////////////////////// CLASSE BOARD ////////////////////////////////////////////
 
 Board::Board (int set_cell_n,int set_dim)
     : cell_number(set_cell_n), dimension(set_dim), 
@@ -406,7 +569,6 @@ void Board::setgrid (std::vector<state> state) {
 
 }
 
-// Funzione per printare nel caso bidimensionale
 void Board::print2D() {
     for (size_t i=0; i<grid.size(); i++) {
         if (k_module(cell_number,i)==cell_number-1) {
@@ -422,14 +584,31 @@ void Board::print2D() {
     }    
 }
 
-    std::vector<std::vector<std::vector<state>>> Board::all_plays() {
-       std::vector<std::vector<std::vector<state>>> result; 
-        // Richiama la funzione ricorsiva per generare le mosse
-        generate_moves(grid, cell_number, dimension, result, 0);
-        //cout<<"ora seleziono"<<endl;
-        removeDuplicateVectors(result); //AL MOMENTO PARE INCALCOLABILE...
-        return result;
+std::vector<std::vector<std::vector<state>>> Board::all_plays() {
+   std::vector<std::vector<std::vector<state>>> result; 
+    // Richiama la funzione ricorsiva per generare le mosse
+    generate_moves(grid, cell_number, dimension, result, 0);
+    //cout<<"ora seleziono"<<endl;
+    removeDuplicateVectors(result); //AL MOMENTO PARE INCALCOLABILE...
+    return result;
+}
+char Board::End() {
+   if (check_win(grid,cell_number,dimension)) {
+    if (type_count(state::X,grid)>type_count(state::O,grid)){
+        return 'X';
     }
+    else if (type_count(state::X,grid)<=type_count(state::O,grid)) {
+        return 'O';
+    }
+   }
+   
+    return '-';
+}
+
+double Board::Entropy () {
+    int tot_energy = Energy(grid,cell_number,dimension,state::N,1);
+    return tot_energy;}
+
 //---------------------------------NOTES---------------------------
 /* OLD LINE CHECK 
     int stop=0;
