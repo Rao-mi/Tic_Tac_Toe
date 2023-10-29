@@ -16,8 +16,9 @@ class Board {
     void setgrid(std::vector<state> source);
     bool Move(state player);
     bool AI_Move();
+    char End();
     std::vector<std::vector<std::vector<state>>> all_plays();
-    std::vector<double> Entropy ();
+    double Entropy ();
     void print2D();
 };
 bool areVectorsEquivalent(const std::vector<state>& vec1, const std::vector<state>& vec2);
