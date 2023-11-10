@@ -8,6 +8,9 @@
 
 // Parte extra
 
+// Funzione che calcola iul fattoriale
+unsigned long long factorial(int n);
+
 // Funzione per rendere int pow
 int int_pow (int a, int b);
 
@@ -28,6 +31,8 @@ bool element_verify (int i, const std::vector<std::vector<int>>& limit,int cell_
 //---------------------------------------------------------------------------------
 // Parte di selezione
 
+// Funzione per rimuovere gli elementi uguali in un vector
+void remove_repetitions(std::vector<int>& verify);
 // Funzione per verificare se due vettori rappresentano la stessa direzione
 bool same_directions(const std::vector<int>& first, const std::vector<int>& second);
 
