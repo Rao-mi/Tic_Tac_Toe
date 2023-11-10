@@ -3,6 +3,15 @@
 #include <cmath>
 
 //----------------------------------------------- Parte extra-----------------------------------------
+// Funzione che calcola iul fattoriale
+unsigned long long factorial(int n) {
+    if (n == 0 || n == 1) {
+        return 1;
+    } else {
+        return n * factorial(n - 1);
+    }
+}
+
 // Funzione che calcola il prodotto scalare
 int scalar_p(const std::vector<int>& vector1, const std::vector<int>& vector2){
     // Assicurati che entrambi i vettori abbiano la stessa dimensione
@@ -77,6 +86,28 @@ for (int k=0; k<static_cast<int>(limit.size()); k++) {
 return false;
 }
 //--------------------------------------------Parte di selezione------------------------------------
+
+// Funzione per rimuovere gli elementi uguali in un vector
+void remove_repetitions(std::vector<int>& verify) {
+    std::vector<int> uniqueElements;
+    
+    for (const int& element : verify) {
+        bool isUnique = true;
+
+        for (const int& uniqueElement : uniqueElements) {
+            if (element == uniqueElement) {
+                isUnique = false;
+                break;
+            }
+        }
+
+        if (isUnique) {
+            uniqueElements.push_back(element);
+        }
+    }
+
+    verify = uniqueElements;
+}
 // Funzione per verificare se due vettori rappresentano la stessa direzione
 bool same_directions(const std::vector<int>& first, const std::vector<int>& second) {
     if (first.size() != second.size()) {
@@ -294,13 +325,11 @@ std::vector<std::vector<std::vector<int>>> hyper_constrains (std::vector<std::ve
         directions.clear();
         // escludo le celle interne
         if(!element_verify(i,constrains,cell_number,dimension)) {
-            std::cout<<i<<" è cella interna"<<std::endl;
              std::vector<int> empty;
             directions.push_back(empty);
         }
         //escludendo gli angoli
         else if(is_corner(cell_number,dimension,i)){
-            std::cout<<i<<" è angolo"<<std::endl;
             directions = k_comb_gen(dimension); // Genero le direzioni
             directions= zero_cut(directions); // Tolgo lo zero
             for (int k=0; k<static_cast<int>(constrains.size()); k++) {
@@ -312,7 +341,6 @@ std::vector<std::vector<std::vector<int>>> hyper_constrains (std::vector<std::ve
         }
 
         else {
-            std::cout<<i<<" è terminale non angolo"<<std::endl;
         for (int k=0; k<static_cast<int>(constrains.size()); k++) {
                 for (size_t f=0; f<constrains[k].size(); f++) {
             if (k_module(int_pow(cell_number,k+1-dimension),i)==constrains[k][f] && k>=dimension) {
