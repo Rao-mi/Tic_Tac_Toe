@@ -13,13 +13,14 @@ class Board {
     std::vector<state> grid;
     public:
     Board(int set_cell_n, int set_dim);
-    void setgrid(std::vector<state> source);
     bool Move(state player);
     bool AI_Move();
-    char End();
-    std::vector<std::vector<std::vector<state>>> all_plays();
-    double Entropy ();
+    bool AI_Ising_Move();
+    state Arena(char first, char second);
     void print2D();
+    std::vector<std::vector<std::vector<state>>> all_plays();
+    char End();
+    void setgrid(std::vector<state> source);
 };
 bool areVectorsEquivalent(const std::vector<state>& vec1, const std::vector<state>& vec2);
 #endif
