@@ -23,20 +23,9 @@ with open('TTT_3^2.csv', 'r') as file:
                 
             # Collega il nodo corrente al nodo della mossa precedente (se esiste)
             if previous_state is not None:
-                #print ("la lunghezza di state num è")
-                #print (len(state_num))
-                #print ("state num è")
-                #print (state_num)
                 for index2, prev in enumerate(previous_state):
                     for index, state in enumerate(states_in_move):
-                               #print("indice dello stato precedente è:") 
-                               #print(index2)
-                               #print("indice associato allo stato ")
-                               #print(state)
-                               #print("è:")
-                               #print(state_num[index])
                                if index2 == state_num[index]:
-                                #print("VERO")
                                 G.add_edge(previous_state[index2],states_in_move[index])
             previous_state=[]
             state_num=[]
@@ -53,8 +42,6 @@ with open('TTT_3^2.csv', 'r') as file:
             # Divide la riga in stato e numero
             parts = line.strip().split(';')
             state = parts[0]
-            #print("int(parts[1].strip()) è")
-            #print (int(parts[1].strip()))
             state_num.append(int(parts[1].strip()))  # Estrai il numero di collegamento
 
             # Aggiungi il vettore di stato alla lista di stati all'interno della mossa
@@ -64,32 +51,7 @@ countO=0
 countN=0
 scores = {}
 end_states = [] 
-'''with open('TTT_ENDS.csv', 'r') as file:
-    for line in file:
-        parts = line.strip().split(';')
-        state = parts[0]
-        win_type = int(parts[1].strip())
-        if win_type ==1:
-            countX=countX+1
-        if win_type ==2:    
-            countO=countO+1
-        if win_type ==0:
-            countN=countN+1
-        end_states.append(state)
-        scores[state] = win_type
-
-print("count X è:",countX)
-print("count O è:",countO)
-print("count N è:",countN)
-'''
-bolla = 1
-for state in end_states:
-    if state in [node for node in G.nodes if not list(G.successors(node))]:
-        bolla=bolla*1
-    else:
-        bolla=bolla*0
-if bolla==1:
-    print("VERO")    
+   
 
 
 root_state = "[ ], [ ], [ ], [ ], [ ], [ ], [ ], [ ], [ ]"  # Stato radice
