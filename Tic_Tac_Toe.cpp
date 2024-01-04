@@ -9,7 +9,7 @@ using std::cout;
 using std::cin;
 using std::endl;
 
-// VALORI NECESSARI A MINMAX
+// VALORI NECESSARI A MINIMAX
 //-------------------------------//
 #define WIN 100000               //
 #define	DRAW 0                   //
@@ -88,8 +88,6 @@ std::vector<std::vector<state>> state_finder(size_t from_move) {
 bool line_check (std::vector<state>& grid, int cell_number, int dimension, int line, int start,std::vector<int> v_dir, std::vector<std::vector<int>> constrain) {
     int u = line;
     int flag=1;
-    //cout<<"cell_number è: "<<cell_number<<endl;
-    //cout<<"dimension è: "<<dimension<<endl;
     state player =grid[start];
     while (player!=state::N){
          if (start+u>=static_cast<int>(grid.size()) || start+u<0){
@@ -102,10 +100,6 @@ bool line_check (std::vector<state>& grid, int cell_number, int dimension, int l
                     std::vector<int> check;
                     if (i>=dimension){check = canonic(dimension,i-dimension);}
                     else {check = inv_canonic(dimension,i);}
-                    // cout<<"check è: "<<endl;
-                   // print(check);
-                    //cout<<"v_dir è: "<<endl;
-                    //print(v_dir); 
                     if (scalar_p(check,v_dir)>0) {
                     player=state::N;
                     j=constrain[i].size()-1;
@@ -191,11 +185,12 @@ bool check_win(std::vector<state> grid, int cell_number, int dimension) {
     int tot_dim = int_pow(cell_number,dimension);
     std::vector<std::vector<int>> limit = constrains(cell_number,dimension); // Grazie a questo vettore posso definire i constrains, mediante aritmetica modulare
     std::vector<int> n_directions; // Essendo una matrice su vettore dovrò trasformare le direzioni in numeri da sommare
+    std::vector<std::vector<int>> start_directions = k_comb_gen(dimension); // Genero le direzioni
+    start_directions = zero_cut(start_directions); // Tolgo lo zero
     state player = state::O; //Mi serve per ciclare senza riscrivere
     while (player!=state::N) {
     for (int i=0; i<tot_dim; i++) {
-            std::vector<std::vector<int>> directions = k_comb_gen(dimension); // Genero le direzioni
-            directions= zero_cut(directions); // Tolgo lo zero
+            std::vector<std::vector<int>> directions = start_directions;
                 if (grid[i]==player) {  // con questo ciclo seleziono le direzioni accettabili confrontando con i constrains generati (es. cella 2 in un 3x3 solo (-1,0);(0,1);(-1,1))
                     for (int k=0; k<static_cast<int>(limit.size()); k++) {
                         for (size_t f=0; f<limit[k].size(); f++) {
@@ -245,17 +240,32 @@ void generate_moves(std::vector<state> grid, int cell_number, int dimension, std
     }
     generate_moves(grid, cell_number, dimension, result, move + 1);
 }
-
-//[1]--------------------------------FUNZIONI NECESSARIE A MINMAX------------------------------------
+//[0][10] Funzione che printa grid
+void print_grid(std::vector<state> print_me, int cell_number){
+    for (size_t i=0; i<print_me.size(); i++) {
+        if (k_module(cell_number,i)==cell_number-1) {
+            if (print_me[i]==state::X) {cout<<" X "<<endl;}
+            else if (print_me[i]==state::O) {cout<<" O "<<endl;}
+            else if (print_me[i]==state::N) {cout<<"[ ]"<<endl;}
+        }
+        else {
+            if (print_me[i]==state::X) {cout<<" X ";}
+            else if (print_me[i]==state::O) {cout<<" O ";}
+            else if (print_me[i]==state::N) {cout<<"[ ]";}
+        }
+    } 
+}
+//[1]--------------------------------FUNZIONI NECESSARIE A MINIMAX------------------------------------
 
 //[1][0] Funzione che verifica la vincita per un tipo state
 bool reduced_check_win(std::vector<state> grid, int cell_number, int dimension, state player) {
     int tot_dim = int_pow(cell_number,dimension);
     std::vector<std::vector<int>> limit = constrains(cell_number,dimension); // Grazie a questo vettore posso definire i constrains, mediante aritmetica modulare
+    std::vector<std::vector<int>> start_directions = k_comb_gen(dimension); // Genero le direzioni
+    start_directions= zero_cut(start_directions); // Tolgo lo zero
     std::vector<int> n_directions; // Essendo una matrice su vettore dovrò trasformare le direzioni in numeri da sommare
     for (int i=0; i<tot_dim; i++) {
-            std::vector<std::vector<int>> directions = k_comb_gen(dimension); // Genero le direzioni
-            directions= zero_cut(directions); // Tolgo lo zero
+         std::vector<std::vector<int>> directions = start_directions;
                 if (grid[i]==player) {  // con questo ciclo seleziono le direzioni accettabili confrontando con i constrains generati (es. cella 2 in un 3x3 solo (-1,0);(0,1);(-1,1))
                     for (int k=0; k<static_cast<int>(limit.size()); k++) {
                         for (size_t f=0; f<limit[k].size(); f++) {
@@ -303,6 +313,7 @@ state opponent=get_opponent(player);
     return DRAW;
 
 }
+//[1][4] Funzione che returna un vettore di interi con gli interi corrispondenti alle mosse legali
 std::vector<int> get_legal_moves (std::vector<state> grid) {
     std::vector<int> result;
 for (size_t i=0; i<grid.size(); i++) {
@@ -312,7 +323,7 @@ for (size_t i=0; i<grid.size(); i++) {
 }
 return result;
 }
-//[1][4] Funzione minimax
+//[1][5] Funzione minimax
 std::pair<int, int> minimax_optimization( std::vector<state>& grid, int cell_number, int dimension,state marker, int depth, int alpha, int beta){
     // Initialize best move
     int best_move = -1;
@@ -379,20 +390,7 @@ std::pair<int, int> minimax_optimization( std::vector<state>& grid, int cell_num
 }
 //[2]------------------------- FUNZIONI NECESSARIE A ISING-LIKE-MODEL -------------------------------
 
-//[2][0] Funzione per inveertire lo stato
-state state_inverter (state player) {
-    if (player==state::X) {
-        return state::O;
-    }
-    else if (player==state::O){
-        return state::X;
-    }
-    else {
-        return state::N;
-    }
-}
-
-//[2][1] Funzione per calcolare lungo la direzione l'energia
+//[2][0] Funzione per calcolare lungo la direzione l'energia
 long double line_energy (char type,std::vector<state> grid, int start,int cell_number, int dimension, int n_direction_k, std::vector<int> v_dir,state player, std::vector<std::vector<int>> constrain) {
     long double unit=pow(factorial(cell_number),(-1.0/cell_number));
     //opzione decrescente 
@@ -445,8 +443,6 @@ long double line_energy (char type,std::vector<state> grid, int start,int cell_n
         else {player=state::N;}          
     }
     long double line_energy=1.0;
-    if(cell_number-flag-anti_flag!=0){ 
-    line_energy = 1.0;}
     for (double i=1; i<flag+1; i++) {
         // opzione decrescente
         if (type=='D' /*|| type=='A'*/ ){line_energy=line_energy*unit/i;}
@@ -456,8 +452,7 @@ long double line_energy (char type,std::vector<state> grid, int start,int cell_n
     if (anti_flag!=0) {line_energy=0;}
     return line_energy;
 }
-
-//[2][2] Funzione per calcolare l'energia secondo Ising-like
+//[2][1] Funzione per calcolare l'energia secondo Ising-like
 long double Energy(std::vector<state> grid,int cell_number, int dimension, state player, double k, char type) {
     long double tot_energy=0.0;
     int tot_dim = int_pow(cell_number,dimension);
@@ -476,11 +471,9 @@ long double Energy(std::vector<state> grid,int cell_number, int dimension, state
 tot_energy=k*tot_energy;
 return tot_energy;
 }
-
-//[2][3] Funzione che returna la mossa che minimizza l'energia
-
+//[2][2] Funzione che returna la mossa che minimizza l'energia
 int min_Energy(std::vector<state> grid,int cell_number, int dimension, state player, double bias) {
-    long double init_energy = Energy(grid,cell_number,dimension,player,0.8,'A');
+    long double init_energy = Energy(grid,cell_number,dimension,player,1.0,'A');
     std::vector<long double> energy_record;
     int tot_dim = int_pow(cell_number,dimension);
     for(int i=0; i<tot_dim; i++){
@@ -519,18 +512,40 @@ int min_Energy(std::vector<state> grid,int cell_number, int dimension, state pla
         }
         }
     }
+    //if you cannot maximize it (in abs val) then minimize it
+    if (energy_min.size()==0){
+    for (size_t j=0; j<energy_record.size(); j++){
+        if (energy_record[j]!=-100){
+        if (fake_energy<=energy_record[j]) {
+            fake_energy =energy_record[j];}
+        if (energy_min.size()==0){
+            energy_min.push_back(fake_energy);
+            energy_min.push_back(static_cast<long double>(j));
+        }
+        else if (energy_min[0]==fake_energy){
+            energy_min.push_back(static_cast<long double>(j));
+        }
+           else {
+            energy_min.clear();
+            energy_min.push_back(fake_energy);
+            energy_min.push_back(static_cast<long double>(j));
+           }
+        }
+    }}
 
     if (energy_min.size()==2){
+        //cout<<energy_min[1]<<endl; //DA ELIMINARE
         return static_cast<int>(energy_min[1]);
     }
     std::random_device rd;  // Genera un seed casuale
     std::mt19937 gen(rd()); // Generatore di numeri casuali Mersenne Twister
     std::uniform_int_distribution<int> dist(1,static_cast<int>(energy_min.size()-1)); // Distribuzione uniforme
     size_t random_number = dist(gen);
+   // cout<<energy_min[random_number]<<endl;//DA ELIMINARE  
     return static_cast<int>(energy_min[random_number]);
-    
-return -1; // Valore predefinito errore
 
+//cout<<"-1"<<endl;  //DA ELIMINARE  
+return -1; // Valore predefinito errore
 }
 
 //[3]---------------------------- FUNZIONI NECESSARIE ALLA VERIFICA ---------------------------------
@@ -715,7 +730,7 @@ while (!board_is_full(grid)) {
     if (flag==1 || flag==4 || flag==5) {grid[Ai_random_play(grid)]=PLAYER_MARKER;}
     else if (flag==2 || flag==6 || flag==7) {std::pair<int,int> result = minimax_optimization(grid,cell_number,dimension,PLAYER_MARKER,0,LOSS,WIN);
     grid[result.second]=PLAYER_MARKER;}
-    else if (flag==3 || flag==8 || flag==9) {grid[min_Energy(grid,cell_number,dimension,PLAYER_MARKER,0.8)]=PLAYER_MARKER;}
+    else if (flag==3 || flag==8 || flag==9) {grid[min_Energy(grid,cell_number,dimension,PLAYER_MARKER,0.647)]=PLAYER_MARKER;}
     
     win = check_win(grid,cell_number,dimension);
         
@@ -740,7 +755,42 @@ while (!board_is_full(grid)) {
 return state::N;
 }
 
-// (6) Funzione per stampare la griglia 2D (volendo anche in dimensioni superiori)
+// (6) Funzione Arena ma con variabile bias per trovare quali siano i migliori valori di b
+
+state Board::Arena(char first, char second, double b){
+bool win;
+int flag=possible_players(first,second);
+
+while (!board_is_full(grid)) {
+    //print_grid(grid,cell_number);//DA ELIMINARE
+    if (flag==1 || flag==4 || flag==5) {grid[Ai_random_play(grid)]=PLAYER_MARKER;}
+    else if (flag==2 || flag==6 || flag==7) {std::pair<int,int> result = minimax_optimization(grid,cell_number,dimension,PLAYER_MARKER,0,LOSS,WIN);
+    grid[result.second]=PLAYER_MARKER;}
+    else if (flag==3 || flag==8 || flag==9) {grid[min_Energy(grid,cell_number,dimension,PLAYER_MARKER,b)]=PLAYER_MARKER;}
+    
+    win = check_win(grid,cell_number,dimension);
+
+    //print_grid(grid,cell_number);   //DA ELIMINARE
+    if(board_is_full(grid)) {return state::N;}
+    else if (win) {return state::X;}
+    else {
+        if (flag==1 || flag==6 || flag==8) {grid[Ai_random_play(grid)]=AI_MARKER;}
+        else if (flag==2 || flag==4 || flag==9) {std::pair<int,int> result = minimax_optimization(grid,cell_number,dimension,AI_MARKER,0,LOSS,WIN);
+        grid[result.second]=AI_MARKER;}
+        else if (flag==3 || flag==5 || flag==7) {grid[min_Energy(grid,cell_number,dimension,AI_MARKER,b)]=AI_MARKER;}
+        
+        win = check_win(grid,cell_number,dimension);
+
+        if(board_is_full(grid)) {return state::N;}
+
+        if (win) {return state::O;}
+    
+}
+}
+return state::N;
+}
+
+// (7) Funzione per stampare la griglia 2D (volendo anche in dimensioni superiori)
 void Board::print2D() {
     for (size_t i=0; i<grid.size(); i++) {
         if (k_module(cell_number,i)==cell_number-1) {
@@ -756,7 +806,7 @@ void Board::print2D() {
     }    
 }
 
-// (7) Funzione per generare tutte le possibili partite e salvarle in 
+// (8) Funzione per generare tutte le possibili partite e salvarle in 
 // un std::vector<std::vector<std::vector<state>>> [i][j][k] ove i è il numero di mosse,
 // j le possibile griglie(partite) a quel numero di mosse ad ogni k corrisponde l'elemento state della griglia
 std::vector<std::vector<std::vector<state>>> Board::all_plays() {
@@ -767,7 +817,7 @@ std::vector<std::vector<std::vector<state>>> Board::all_plays() {
     return result;
 }
 
-// (8) Funzione per verificare se è finito il gioco e nel caso chi ha vinto
+// (9) Funzione per verificare se è finito il gioco e nel caso chi ha vinto
 char Board::End() {
    if (check_win(grid,cell_number,dimension)) {
     if (type_count(state::X,grid)>type_count(state::O,grid)){
@@ -782,217 +832,7 @@ char Board::End() {
 }
 
 //////////////// DA NON USARE //////////////////
-void Board::setgrid (std::vector<state> state) {
-    grid = state;
+void Board::setgrid (std::vector<state> new_grid) {
+    grid = new_grid;
 
 }
-
-//---------------------------------NOTES---------------------------
-/* OLD LINE CHECK 
-    int stop=0;
-    int sign;
-    if (abs(line[order])==line[order]) {sign= 1;}
-    else {sign=-1;}
-    state player =grid[start];
-    while (player!=state::N){
-        cout << "player: " << static_cast<int>(player) << ", u: " << u << ", flag: " << flag << ", start: " << start << ", order: " << order << ", stop: " << stop << endl;//DA TOGLIERE
-        if (start+u>=static_cast<int>(grid.size())){
-            if (u>=line[order]) {
-            u = -abs(line[order]);
-            sign=-sign;
-            }
-            else {player=state::N;}
-        }
-        else if (start+u<0) {
-            cout<<"CIAO"<<endl;
-            player=state::N;}
-        if (grid[start+u]==player && stop==0 && player!=state::N) {            
-            for (size_t i=0; i<constrain.size(); i++) {
-            for (size_t j=0; j<constrain[i].size(); j++) {
-                if (start+u==constrain[i][j]) {
-                    std::vector<int> check;
-                    if (i>=(constrain.size()/2)){check = canonic(cell_number-1,i);}
-                    else {check = inv_canonic(cell_number-1,i);}
-                    cout<<"check è:"<<endl;
-                    prin(check);
-                    if (sign*scalar_p(check,directions[order])>0) {stop = 1;}
-
-                    // dovrei qui confrontare con la direzione u vettoriale e i=(0,0,0,...1...0)
-                    // se ne ho anche solo una (u) che ha una componente su i (si potrebbe dire se <k,i>!=0)
-                    // allora stop e si continua con lo stesso principio al contrario
-                }
-            }
-            }
-            u+=u;
-            flag +=1;        
-        }                
-        else if (grid[start+u]==player && stop!=0 && player!=state::N) {
-            u = -abs(line[order]);
-            sign=-sign;
-            stop=0;
-        }
-        else if (grid[start+u]!=player && stop==0 && player!=state::N) {
-            if (u>=line[order]) {
-            u = -abs(line[order]);
-            sign=-sign;
-            }
-            else {player=state::N;}
-        }
-        
-    }
-    if (flag==cell_number) {return true;}
-    else {return false;}
-}
-    */
-// check sul ciclo di line check 
-/*if (i>=dimension) {cout<<"k_module("<<int_pow(cell_number,i+1-dimension)<<","<<start+u<<")==constrain["<<i<<"]["<<j<<"] -> "<<k_module(int_pow(cell_number,i+1-dimension),start+u)<<"=="<<constrain[i][j]<<endl;}
-                else {cout<<"k_module("<<int_pow(cell_number,i+1)<<","<<start+u<<")==constrain["<<i<<"]["<<j<<"] -> "<<k_module(int_pow(cell_number,i+1),start+u)<<"=="<<constrain[i][j]<<endl;}*/
-// CHECK 4 CHECK_WIN
-/*    cout<<"k+1 è: "<<k+1<<endl;
-    cout<<"K è:"<<k<<endl;
-  if (k+1<cell_number) {cout<<"Il corrispettivo k_module per i("<<i<<") f("<<f<<") e k("<<k<<") è : "<<k_module(int_pow(cell_number,k+1),i)<<endl;
-   cout<<"mentre limit[k][f] è: "<<limit[k][f]<<endl;
-    if (k_module(int_pow(cell_number,k+1),i)==limit[k][f]) {cout<<"TRUE"<<endl;}}
-else if (k+1>=cell_number) {cout<<"Il corrispettivo k_module per i("<<i<<") f("<<f<<") e k("<<k<<") è : "<<k_module(int_pow(cell_number,k+2-cell_number),i)<<endl;
-   cout<<"mentre limit[k][f] è: "<<limit[k][f]<<endl;
-    if (k_module(int_pow(cell_number,k+2-cell_number),i)==limit[k][f]) {cout<<"TRUE"<<endl;}}*/
-    // inoltre sul ciclo k con line_check
-//cout<<"line check[k="<<k<<"] = line check[n_directions["<<k<<"]] = "<<line_check(grid,cell_number,dimension,n_directions[k],i, limit)<<endl;
-
-
-/*
-// da aggiungere la parte di fluttuazione nel caso di mancanza di mosse minimizzanti
-    fake_energy=pow(init_energy,2);
-    energy_record.clear();
-if (type=='R') {
-// opzione ricorsiva
-    if(energy_min.size()==1){return static_cast<int>(energy_min[0]);}
-    for(size_t i=1; i<energy_min.size(); i++){
-        grid[energy_min[i]]=player;
-        int opponent = min_Energy(grid,cell_number,dimension,get_opponent(player),'R');
-        grid[opponent] = get_opponent(player);
-        energy_record.push_back(Energy(grid,cell_number,dimension,player,1.0,'f'));
-        grid[energy_min[i]]=state::N;
-        grid[opponent] = state::N;
-    }
-    std::vector<long double> energy_opponent_max;
-    for(size_t i=1; i<energy_min.size(); i++){
-            if (energy_record[i-1]<energy_min[0] && fake_energy>=energy_record[i-1]) {
-            fake_energy =energy_record[i-1];
-           if (energy_opponent_max.size()==0){
-            energy_opponent_max.push_back(fake_energy);
-            energy_opponent_max.push_back(static_cast<long double>(i));
-           }
-           else if (energy_opponent_max[0]==fake_energy){
-            energy_opponent_max.push_back(static_cast<long double>(i));
-           }
-           else {
-            energy_opponent_max.clear();
-            energy_opponent_max.push_back(fake_energy);
-            energy_opponent_max.push_back(static_cast<long double>(i));
-           }
-        }
-        }
-    //ora se energy_min è vuoto prendo fake_enery come riferimento e returno l'int associato
-    if (energy_opponent_max.size()==0){
-    for (size_t i=1; i<energy_min.size(); i++){
-        if (fake_energy==energy_record[i-1]){
-            return static_cast<int>(energy_min[i]);
-        }
-        else return -1;
-    } 
-    }
-    // altrimenti uso energy_opponent_max
-    else {
-        std::random_device rd;  // Genera un seed casuale
-        std::mt19937 gen(rd()); // Generatore di numeri casuali Mersenne Twister
-        std::uniform_int_distribution<size_t> dist(1,(energy_opponent_max.size()-1)); // Distribuzione uniforme
-        size_t random_number = dist(gen);
-        return static_cast<int>(energy_opponent_max[random_number]);
-    }
-
-    
-}
-// parte di min_energy
-// opzione non ricorsiva
-else {
-    fake_energy=-pow(init_energy,2);
-    energy_record.clear();
-    std::vector<std::vector<long double>> energy_opponent_max;
-    std::vector<long double> energy_opponent;
-
-    for (size_t k=1; k<energy_min.size(); k++){
-        for(int i=0; i<tot_dim; i++){
-                grid[energy_min[k]]=player;
-
-            if (grid[i]==state::N) {
-                grid[i]=get_opponent(player);
-                energy_record.push_back(Energy(grid,cell_number,dimension,get_opponent(player),1.0,'f'));
-                grid[i]=state::N;
-            }
-            else {energy_record.push_back(-100);}}
-            cout<<"Alla possibilità k="<<k<<" otteniamo che se l'avversario gioca la casella"<<endl;
-            for(int i=0; i<tot_dim; i++){
-                cout<<i<<" si ha energia dell'avversario pari a:"<<energy_record[i]<<endl;
-            }
-            for (size_t j=0; j<energy_record.size(); j++){
-                if (energy_record[j]!=-100){
-                    if (fake_energy<=energy_record[j]) {
-                        fake_energy =energy_record[j];
-                        cout<<"nel caso del blocco "<<j<<" fake energy diventa: "<<fake_energy<<endl;
-                        if (energy_opponent.size()==0){
-                             energy_opponent.push_back(fake_energy);
-                             energy_opponent.push_back(static_cast<long double>(j));
-                            }
-                            else if (energy_opponent[0]==fake_energy){
-                                cout<<"ho aggiunto al vettore energy opponent di energia: "<<energy_opponent[0]<<" la posizione: "<<j<<endl;
-                             energy_opponent.push_back(static_cast<long double>(j));
-                            }
-                            else {
-                             energy_opponent.clear();
-                             energy_opponent.push_back(fake_energy);
-                             energy_opponent.push_back(static_cast<long double>(j));
-                            }
-                    }
-                }
-              }
-        
-    energy_opponent_max.push_back(energy_opponent);
-    energy_opponent.clear();
-    grid[energy_min[k]]=state::N;
-    }
-    fake_energy=-pow(init_energy,2);
-
-        for (size_t k=0; k<energy_opponent_max.size(); k++){
-            if (energy_opponent_max[k].size()!=0 && energy_opponent_max[k][0]>=fake_energy){fake_energy=energy_opponent_max[k][0];}
-        }
-cout<<"FINO A QUI OK"<<endl;
-cout<<"Abbiamo "<<energy_opponent_max.size()<<" possibilità che minimizzano, le quali ci danno rispettivamente energie:"<<endl;
-for (size_t k=0; k<energy_opponent_max.size(); k++){
-     cout<<energy_opponent_max[k][0]<<" di mosse ";
-    for (size_t j=1; j<energy_opponent_max[k].size(); j++){
-    cout<<energy_opponent_max[k][j]<<" ,";
-}}
-cout<<endl;
-    if (fake_energy !=-pow(init_energy,2)){
-        std::vector<int> positions;
-        for (size_t k=1; k<energy_min.size(); k++){
-            if(energy_opponent_max[k-1][0]==fake_energy){
-                    positions.push_back(static_cast<int>(energy_min[k]));
-            }
-        }
-        remove_repetitions(positions);
-        if (positions.size()==1){return positions[0];}
-        else{
-        std::random_device rd;  // Genera un seed casuale
-        std::mt19937 gen(rd()); // Generatore di numeri casuali Mersenne Twister
-        std::uniform_int_distribution<int> dist(0,(positions.size()-1)); // Distribuzione uniforme
-        size_t random_number = dist(gen);
-        return positions[random_number];
-        }
-    }
-    else{// da aggiungere la parte di fluttuazione nel caso di mancanza di mosse massimizzanti
-
-    }
-
-}*/
