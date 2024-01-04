@@ -31,5 +31,9 @@
 *.out
 *.app
 
+# Generated
+*.png
+*.csv
+
 a.out.dSYM/
 .vscode/
