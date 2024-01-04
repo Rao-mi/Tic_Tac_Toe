@@ -46,15 +46,13 @@ with open('TTT_3^2.csv', 'r') as file:
 
             # Aggiungi il vettore di stato alla lista di stati all'interno della mossa
             states_in_move.append(state)
-countX=0
-countO=0
-countN=0
+root_state = "[ ], [ ], [ ], [ ], [ ], [ ], [ ], [ ], [ ]"  # Stato radice
+
+
 scores = {}
 end_states = [] 
-   
 
 
-root_state = "[ ], [ ], [ ], [ ], [ ], [ ], [ ], [ ], [ ]"  # Stato radice
 node_attributes = {}
 node_prob = {}
 def minimax(node, depth, maximizing_player, node_attributes,G):
@@ -148,44 +146,6 @@ def prob_ass(node,node_prob,maximizing_player,G):
             node_prob[child] = {'prob': prob}
     for child in successors:
         prob_ass(child,node_prob,not maximizing_player,G)
-
-
-
-'''
-minimax(root_state,9,True,node_attributes,G)
-final_correction(True,node_attributes,G)
-#print(node_attributes)
-nx.set_node_attributes(G, node_attributes)
-# Ottenere gli attributi dei nodi
-attributes = nx.get_node_attributes(G, 'value')
-
-# Definisci l'attributo che vuoi controllare
-attributo_da_verificare = "value"
-
-# Crea una lista per memorizzare i nodi senza l'attributo specificato
-nodi_senza_attributo = []
-
-for nodo in G.nodes:
-    # Controlla se l'attributo specificato non è presente nel nodo
-    if attributo_da_verificare not in G.nodes[nodo]:
-        nodi_senza_attributo.append(nodo)
-
-# Ora la lista `nodi_senza_attributo` contiene i nodi che non hanno l'attributo "value"
-print("Nodi senza l'attributo '{}':".format(attributo_da_verificare))
-print(nodi_senza_attributo)
-print("i nodi senza attributo in end_state sono:")
-for node in nodi_senza_attributo:
-    if node in end_states:
-        print(node)
-# Stampa gli attributi
-#for node, value in attributes.items():
-#    print(f"Nodo {node}: value={value}")
-
-prob_ass(root_state,node_prob,True,G)
-print (node_attributes)
-print(node_prob)
-
-'''
 
 # Calcola la posizione dei nodi in un layout ad albero
 pos = pydot_layout(G, prog='dot')
