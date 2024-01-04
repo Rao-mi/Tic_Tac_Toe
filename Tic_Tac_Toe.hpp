@@ -17,8 +17,9 @@ class Board {
     bool AI_Move();
     bool AI_Ising_Move();
     state Arena(char first, char second);
+    state Arena(char first, char second, double b);
     void print2D();
-    std::vector<std::vector<std::vector<state>>> all_plays();
+    std::vector<std::vector<std::vector<state>>> all_plays();   
     char End();
     void setgrid(std::vector<state> source);
 };
