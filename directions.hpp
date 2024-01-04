@@ -44,6 +44,7 @@ std::vector<std::vector<int>> zero_cut(std::vector<std::vector<int>> directions)
 
 // Funzione di verifica angoli
 bool is_corner(int cell_number, int dimension, int i);
+
 //----------------------------------------------------------------------------------------
 //Parte di generazione
 
