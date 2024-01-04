@@ -31,7 +31,7 @@ int main() {
         record.push_back(tavola.Arena(first,second));
     }
     auto end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>((end - start)/games_number);
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>((end - start)/static_cast<double>(games_number));
     games_number=0;
     cell_number=0;
     dimension=0;
