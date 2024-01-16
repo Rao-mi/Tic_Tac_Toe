@@ -74,21 +74,15 @@ defined a priori dimension or rather not known to the compiler.
 Therefore, the only way is to define a single vector,
 `std::vector<state>`, with a size equal to
 `cell``number`<sup>`dimension`</sup>, resulting in the following
-correspondence:
-$$\begin{gathered}
-  T : \underbrace{V \times V \times \ldots \times V}\_h \to K \Rightarrow T \otimes \Vec{W} = k\\
-     \mathrel{\vphantom{\underbrace{V \times V \times \ldots \times V}\_{\texttt{dimension}}}} \Updownarrow \\
-     \mathrel{\vphantom{\underbrace{V \times V \times \ldots \times V}\_{\texttt{dimension}}}}
-     T : \underbrace{\texttt{state}^n \times \ldots \texttt{state}^n}\_h \to \texttt{state} \Rightarrow \texttt{vector\<state\>T}\[\lambda_0 +\lambda_1 \cdot n+\ldots+\lambda\_{h-1}\cdot n^{h-1}\] = \texttt{state}
- \end{gathered}$$
+correspondence:<br><br>
+  ![Equation](https://latex.codecogs.com/svg.latex?%5Cbegin%7Bgathered%7D%20T%20%3A%20%5Cunderbrace%7BV%20%5Ctimes%20V%20%5Ctimes%20%5Cldots%20%5Ctimes%20V%7D_h%20%5Cto%20K%20%5CRightarrow%20T%20%5Cotimes%20%5CVec%7BW%7D%20%3D%20k%5C%5C%20%20%5Cmathrel%7B%5Cvphantom%7B%5Cunderbrace%7BV%20%5Ctimes%20V%20%5Ctimes%20%5Cldots%20%5Ctimes%20V%7D_%7B%5Ctexttt%7Bdimension%7D%7D%7D%7D%20%5CUpdownarrow%20%5C%5C%20%20%5Cmathrel%7B%5Cvphantom%7B%5Cunderbrace%7BV%20%5Ctimes%20V%20%5Ctimes%20%5Cldots%20%5Ctimes%20V%7D_%7B%5Ctexttt%7Bdimension%7D%7D%7D%7D%20T%20%3A%20%5Cunderbrace%7B%5Ctexttt%7Bstate%7D%5En%20%5Ctimes%20%5Cldots%20%5Ctimes%20%5Ctexttt%7Bstate%7D%5En%7D_h%20%5Cto%20%5Ctexttt%7Bstate%7D%20%5CRightarrow%20%5Ctexttt%7Bvector%3Cstate%3ET%7D%5B%5Clambda_0%20%2B%20%5Clambda_1%20%5Ccdot%20n%20%2B%20%5Cldots%20%2B%20%5Clambda_%7Bh-1%7D%20%5Ccdot%20n%5E%7Bh-1%7D%5D%20%3D%20%5Ctexttt%7Bstate%7D%5Cend%7Bgathered%7D)    
 Where `dimension` has been referred to as *h*, and `cell``number` as *n*
 for conciseness;  
   
-$\Vec{W} \in \underbrace{V \times V \times \ldots \times V}\_h$,
-$\Vec{W} = (\Vec{w_1}, \Vec{w_2},\ldots,\Vec{w_h})$; *k* ∈ *K*;  
-while *λ* is defined by
-*f*<sub>*λ*</sub> : `state`<sup>*n*</sup> → \[0,...,*n*<sup>*h*</sup>−1\],
-$f\_{\lambda}(\Vec{w}\_l)=\sum\_{m=0}^{n-1} \Vec{w}\_l \cdot \Vec{e}\_{m+1} \cdot m = \lambda_l$.  
+![Equation Part 1](https://latex.codecogs.com/svg.latex?\Vec{W}%20\in%20\underbrace{V%20\times%20V%20\times%20\ldots%20\times%20V}_h,%20\Vec{W}%20=%20(\Vec{w_1},%20\Vec{w_2},\ldots,\Vec{w_h});%20k%20\in%20K;)
+
+![Equation Part 2](https://latex.codecogs.com/svg.latex?\text{while%20}\lambda%20\text{%20is%20defined%20by%20}%20f_{\lambda}%20:%20\texttt{state}^n%20\to%20[0,%20\ldots,%20n^h%20-1],\%20f_{\lambda}(\Vec{w}_l)%20=%20\sum_{m=0}^{n-1}%20\Vec{w}_l%20\cdot%20\Vec{e}_{m+1}%20\cdot%20m%20=%20\lambda_l)
+
   
 An attentive observer will notice that by the definition of
 *f*<sub>*λ*</sub>, there is no guarantee that
