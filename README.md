@@ -1344,30 +1344,27 @@ those for plotting, can be found at :
 
 |             | Random | MiniMax | Ising |
 |:-----------:|:------:|:-------:|:-----:|
-| 2-4 Random  |   34   |   100   |  99   |
-| 2-4 MiniMax |   0    |    0    |   0   |
-|  2-4 Ising  |   0    |    0    |  52   |
-|     2-4     |        |         |       |
+|  Random  |   34   |   100   |  99   |
+| MiniMax |   0    |    0    |   0   |
+|  Ising  |   0    |    0    |  52   |
 
 Wins per 100 games, where columns represent the first player and rows
 represent the second player
 
 |             | Random | MiniMax | Ising |
 |:-----------:|:------:|:-------:|:-----:|
-| 2-4 Random  |   41   |    0    |   1   |
-| 2-4 MiniMax |   16   |   100   |  100  |
-|  2-4 Ising  |   12   |   100   |  48   |
-|     2-4     |        |         |       |
+| Random  |   41   |    0    |   1   |
+| MiniMax |   16   |   100   |  100  |
+|  Ising  |   12   |   100   |  48   |
 
 Draws per 100 games, where columns represent the first player and rows
 represent the second player
 
 |             | Random | MiniMax | Ising |
 |:-----------:|:------:|:-------:|:-----:|
-| 2-4 Random  |   41   |    0    |   0   |
-| 2-4 MiniMax |   16   |    0    |   0   |
-|  2-4 Ising  |   12   |    0    |   0   |
-|     2-4     |        |         |       |
+| Random  |   41   |    0    |   0   |
+| MiniMax |   16   |    0    |   0   |
+|  Ising  |   12   |    0    |   0   |
 
 Losses per 100 games, where columns represent the first player and rows
 represent the second player
