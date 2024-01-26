@@ -1,5 +1,7 @@
 NOTE THIS README.MD HAS BEEN CREATED CONVERTING A LATEX FILE, AND HAS NOT BEEN CORRECTED
 
+A special thanks goes to @indoor-industry that showed me the Ising model and helped me understading it
+
 *“Chess is not a game. Chess is a well-defined form of computation. You
 may not be able to work out the answers, but in theory there must be a
 solution, a right move in any position. ”*
